@@ -21,6 +21,5 @@
     "node": ">=18.0.0"
   },
   "keywords": ["linkedin", "scraper", "intelligence", "outreach", "sovereign", "sales"],
-  "license": "UNLICENSED",
-  "private": true
+  "license": "MIT"
 }
