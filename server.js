@@ -346,7 +346,154 @@ function parseCookieString(cookieStr) {
 
 
 /* ═══════════════════════════════════════════
+   ◊ PSYCHE ENGINE — Freud · Jung · Tone · Sales 101
+   Deep psychological profiling for sniper-grade outreach
+   ═══════════════════════════════════════════ */
+
+const PSYCHE_SYSTEM = `You are the FallScout Psyche Engine — a deep psychological profiling system that combines four frameworks to decode a prospect's inner world from their LinkedIn presence.
+
+## FRAMEWORK 1: FREUDIAN DRIVE ANALYSIS
+Analyze the prospect's content through Freud's structural model:
+- **Id (Desire)**: What do they REALLY want? Status? Control? Recognition? Security? Freedom? What unconscious desires leak through their posts?
+- **Ego (Reality)**: How do they present themselves? What image do they curate? Where is the gap between who they ARE and who they PERFORM?
+- **Superego (Ideal)**: What values do they signal? What do they moralize about? What would they be ashamed to admit they want?
+- **Defense Mechanisms**: Do they intellectualize? Project? Rationalize? Sublimate? How do they handle vulnerability in public?
+- **Transference Potential**: What authority figures / archetypes will they transfer onto a seller? Mentor? Peer? Challenger? Expert?
+
+## FRAMEWORK 2: JUNGIAN ARCHETYPE MAPPING
+Identify their dominant and shadow archetypes from the 12 Jungian types:
+- **Creator**: Innovates, builds, vision-driven. Trigger: "Build something new"
+- **Ruler**: Controls, structures, authority. Trigger: "Take command"
+- **Sage**: Analyzes, learns, truth-seeking. Trigger: "Understand deeper"
+- **Explorer**: Freedom, discovery, pioneering. Trigger: "Uncharted territory"
+- **Hero**: Achievement, mastery, proving worth. Trigger: "Overcome the challenge"
+- **Magician**: Transformation, catalyzing change. Trigger: "Transform everything"
+- **Rebel/Outlaw**: Disruption, breaking rules. Trigger: "Destroy the old way"
+- **Lover**: Connection, passion, experience. Trigger: "Feel the impact"
+- **Caregiver**: Service, protection, helping. Trigger: "Help your people"
+- **Jester**: Joy, humor, lightness. Trigger: "Life's too short"
+- **Everyman**: Belonging, authenticity, realness. Trigger: "We're all in this"
+- **Innocent**: Optimism, simplicity, faith. Trigger: "It can be simple"
+
+Also identify their **Shadow archetype** — the repressed opposite they deny but that still influences them.
+
+## FRAMEWORK 3: TONEENGINE VOICE FINGERPRINT
+Perform granular tone analysis on their writing:
+- **Rhythm**: Short punchy sentences vs. flowing prose vs. list-maker vs. storyteller
+- **Register**: Academic / Corporate / Conversational / Street / Technical
+- **Power Words**: What vocabulary do they gravitate toward? (data-driven? emotional? action-oriented?)
+- **Signature Patterns**: Do they use questions? Metaphors? Numbers? Stories? Commands? Confessions?
+- **Emotional Valence**: Predominantly positive, negative, analytical, or mixed?
+- **Status Signals**: Do they signal UP (aspirational), ACROSS (peer), or DOWN (mentoring)?
+- **Mimicry Blueprint**: Exact stylistic rules to write AS THEM — sentence length, vocabulary level, emoji usage, paragraph structure, capitalization patterns
+
+## FRAMEWORK 4: SALES 101 METHODOLOGY
+Map the prospect to the optimal sales approach:
+- **SPIN Selling**: What are their Situation, Problem, Implication, Need-payoff signals?
+- **Challenger Sale**: Can we teach them something? Reframe their thinking? Take control of the conversation?
+- **Solution Selling**: What specific pain are they trying to solve right now?
+- **Consultative**: Do they need a trusted advisor? Someone to validate their direction?
+- **Sandler**: What's their pain level? Budget authority? Decision process?
+- **Gap Selling**: Where are they NOW vs. where they WANT to be? What's the gap?
+- **Trigger Events**: Any recent changes (new role, funding, hiring, launch) that create urgency?
+
+Output MUST be a structured JSON object. Be brutally specific — reference actual quotes from their posts, actual patterns in their writing. No generic psychology. Every insight must tie to observable evidence.`;
+
+async function profilePsyche(profile, posts, provider = 'anthropic') {
+  const prompt = `Perform a deep psychological profile of this LinkedIn prospect using Freudian, Jungian, ToneEngine, and Sales 101 frameworks.
+
+## PROFILE
+Name: ${profile.name}
+Headline: ${profile.headline}
+Location: ${profile.location}
+About: ${profile.about || '(not available)'}
+Experience: ${JSON.stringify(profile.experience?.slice(0, 5) || [])}
+Skills: ${(profile.skills || []).join(', ')}
+
+## THEIR WRITING — RECENT POSTS (${posts.length} total)
+${posts.map((p, i) => `[Post ${i + 1}] (${p.likes} likes, ${p.comments} comments, ${p.type})
+${p.text.slice(0, 600)}`).join('\n\n')}
+
+Return a JSON object:
+{
+  "freud": {
+    "id_desire": "what they unconsciously want most",
+    "ego_presentation": "the image they curate publicly",
+    "superego_values": ["value1", "value2"],
+    "gap": "the tension between desire and presentation",
+    "defense_mechanisms": ["mechanism1", "mechanism2"],
+    "transference_type": "mentor|peer|challenger|expert|authority",
+    "ego_triggers": ["things that make them feel seen/validated"],
+    "vulnerability_patterns": "how they handle vulnerability publicly"
+  },
+  "jung": {
+    "dominant_archetype": "one of the 12",
+    "archetype_evidence": "specific posts/patterns proving this",
+    "shadow_archetype": "the repressed opposite",
+    "shadow_evidence": "what hints at the shadow",
+    "trigger_phrase": "the core desire phrase that activates their archetype",
+    "individuation_stage": "how self-aware are they about their own patterns"
+  },
+  "tone": {
+    "rhythm": "short-punchy|flowing-prose|list-maker|storyteller|mixed",
+    "register": "academic|corporate|conversational|street|technical",
+    "power_words": ["their most-used high-impact words"],
+    "signature_patterns": ["questions|metaphors|numbers|stories|commands|confessions"],
+    "emotional_valence": "positive|negative|analytical|mixed",
+    "status_signal": "up|across|down",
+    "mimicry_rules": {
+      "avg_sentence_length": "short (5-10) | medium (10-20) | long (20+)",
+      "paragraph_style": "one-liner | 2-3 sentences | walls of text",
+      "emoji_pattern": "none | strategic | heavy",
+      "capitalization": "standard | ALL CAPS emphasis | Title Case headers",
+      "vocabulary_level": "simple | professional | academic | jargon-heavy",
+      "opening_style": "how they typically start posts",
+      "closing_style": "how they typically end posts"
+    }
+  },
+  "sales101": {
+    "methodology_fit": "SPIN|Challenger|Solution|Consultative|Sandler|Gap",
+    "spin": {
+      "situation": "their current state",
+      "problem": "what's not working",
+      "implication": "what happens if unsolved",
+      "need_payoff": "what solving it would mean"
+    },
+    "gap": {
+      "current_state": "where they are",
+      "desired_state": "where they want to be",
+      "the_gap": "what's between them"
+    },
+    "trigger_events": ["recent changes creating urgency"],
+    "buying_stage": "unaware|problem-aware|solution-aware|evaluating|ready",
+    "decision_style": "data-driven|intuitive|consensus|authority|risk-averse",
+    "objection_predictions": ["likely objections they'd raise"],
+    "authority_level": "decision-maker|influencer|gatekeeper|unknown"
+  },
+  "sniper_brief": {
+    "one_line": "the single most important thing to know about this person",
+    "approach_in_their_language": "how to frame your pitch USING THEIR words and style",
+    "emotional_entry_point": "the feeling to trigger in the opening line",
+    "logical_bridge": "the rational argument that follows the emotional hook",
+    "forbidden_moves": ["approaches that will definitely fail with this person"],
+    "optimal_timing": "best time/context to reach out based on their posting patterns",
+    "conversation_arc": "the 3-message sequence: open → deepen → ask"
+  }
+}`;
+
+  const raw = await callAI(prompt, PSYCHE_SYSTEM, provider);
+  try {
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    return jsonMatch ? JSON.parse(jsonMatch[0]) : { raw };
+  } catch {
+    return { raw };
+  }
+}
+
+
+/* ═══════════════════════════════════════════
    ◊ RESEARCH MODULE — AI-Powered Analysis
+   (Now feeds from Psyche Engine)
    ═══════════════════════════════════════════ */
 
 const RESEARCH_SYSTEM = `You are FallScout, a LinkedIn intelligence analyst. You analyze prospect profiles and their recent posts to identify:
@@ -404,23 +551,80 @@ Return a JSON object with these keys:
    ◊ OUTREACH MODULE — Tailored DMs
    ═══════════════════════════════════════════ */
 
-const OUTREACH_SYSTEM = `You are FallScout's outreach engine. You craft personalized LinkedIn DMs that:
+const OUTREACH_SYSTEM = `You are FallScout's SNIPER outreach engine. You don't just personalize — you psychologically precision-target every DM using deep profiling data.
 
-1. **Open with a specific reference** to their recent post or achievement — prove you actually looked
-2. **Bridge naturally** from what THEY care about to what you offer
-3. **Keep it short** — under 150 words, ideally under 100
-4. **End with a low-friction ask** — not "can we schedule a call?" but something they can answer in one line
-5. **Sound human** — match their communication style (formal if they're formal, casual if they're casual)
-6. **Never sound like a template** — every word should feel chosen for THIS person
+You have access to:
+- **Freudian drive analysis** — what they unconsciously desire, their ego presentation, defense mechanisms
+- **Jungian archetype mapping** — their dominant archetype, shadow, and activation triggers
+- **ToneEngine voice fingerprint** — their exact writing style, rhythm, vocabulary, emotional valence
+- **Sales 101 methodology** — optimal selling framework, buying stage, objection predictions
 
-The goal: cut through the noise. No "I hope this message finds you well." No "I came across your profile." No filler. Start with something only someone who read their content would say.`;
+## SNIPER RULES:
 
-async function generateDM(research, context, tone = 'professional', provider = 'anthropic') {
-  const prompt = `Generate 3 tailored LinkedIn DMs for this prospect.
+1. **MIRROR THEIR VOICE** — Use the ToneEngine mimicry rules. If they write short punchy sentences, you write short punchy sentences. If they use metaphors, you use metaphors. If they never use emoji, you never use emoji. The message should read like THEY could have written it.
+
+2. **ACTIVATE THEIR ARCHETYPE** — A Creator wants to hear about BUILDING something new. A Ruler wants CONTROL. A Sage wants INSIGHT. A Hero wants a CHALLENGE. Hit their archetype trigger, not generic value props.
+
+3. **ENTER THROUGH EMOTION, BRIDGE WITH LOGIC** — Use the Freudian emotional entry point first (ego validation, desire acknowledgment), then bridge to the rational case. Never lead with features.
+
+4. **SPEAK TO THE GAP** — Reference the distance between where they ARE and where they WANT to be. The gap creates urgency without being pushy.
+
+5. **AVOID THEIR DEFENSES** — If they intellectualize, don't be too emotional. If they're guarded, don't be too familiar too fast. If they signal status-up, don't patronize.
+
+6. **UNDER 100 WORDS** — Sniper, not shotgun. Every word earns its place.
+
+7. **LOW-FRICTION ASK** — End with something they can answer in one line. Not "let's schedule a call" but a question that makes them WANT to respond.
+
+The goal: they read this and think "this person gets me" — not "this person wants my money."`;
+
+async function generateDM(research, context, tone = 'professional', provider = 'anthropic', psyche = null) {
+  const psycheBlock = psyche ? `
+## PSYCHOLOGICAL PROFILE (SNIPER DATA)
+
+### FREUDIAN ANALYSIS
+- Core desire (Id): ${psyche.freud?.id_desire || 'unknown'}
+- Public image (Ego): ${psyche.freud?.ego_presentation || 'unknown'}
+- Values signaled (Superego): ${JSON.stringify(psyche.freud?.superego_values || [])}
+- Desire-presentation gap: ${psyche.freud?.gap || 'unknown'}
+- Defense mechanisms: ${JSON.stringify(psyche.freud?.defense_mechanisms || [])}
+- Transference type: ${psyche.freud?.transference_type || 'unknown'}
+- Ego triggers: ${JSON.stringify(psyche.freud?.ego_triggers || [])}
+
+### JUNGIAN ARCHETYPE
+- Dominant: ${psyche.jung?.dominant_archetype || 'unknown'} — ${psyche.jung?.archetype_evidence || ''}
+- Shadow: ${psyche.jung?.shadow_archetype || 'unknown'} — ${psyche.jung?.shadow_evidence || ''}
+- Activation trigger: "${psyche.jung?.trigger_phrase || ''}"
+
+### TONEENGINE VOICE FINGERPRINT
+- Rhythm: ${psyche.tone?.rhythm || 'unknown'}
+- Register: ${psyche.tone?.register || 'unknown'}
+- Power words: ${JSON.stringify(psyche.tone?.power_words || [])}
+- Signature patterns: ${JSON.stringify(psyche.tone?.signature_patterns || [])}
+- Emotional valence: ${psyche.tone?.emotional_valence || 'unknown'}
+- Status signal: ${psyche.tone?.status_signal || 'unknown'}
+- Mimicry rules: ${JSON.stringify(psyche.tone?.mimicry_rules || {})}
+
+### SALES 101
+- Best methodology: ${psyche.sales101?.methodology_fit || 'unknown'}
+- The gap: ${psyche.sales101?.gap?.current_state || '?'} → ${psyche.sales101?.gap?.desired_state || '?'}
+- Trigger events: ${JSON.stringify(psyche.sales101?.trigger_events || [])}
+- Buying stage: ${psyche.sales101?.buying_stage || 'unknown'}
+- Decision style: ${psyche.sales101?.decision_style || 'unknown'}
+- Predicted objections: ${JSON.stringify(psyche.sales101?.objection_predictions || [])}
+
+### SNIPER BRIEF
+- One-line key: ${psyche.sniper_brief?.one_line || ''}
+- Emotional entry point: ${psyche.sniper_brief?.emotional_entry_point || ''}
+- Logical bridge: ${psyche.sniper_brief?.logical_bridge || ''}
+- Forbidden moves: ${JSON.stringify(psyche.sniper_brief?.forbidden_moves || [])}
+- Conversation arc: ${psyche.sniper_brief?.conversation_arc || ''}
+` : '';
+
+  const prompt = `Generate 3 SNIPER-GRADE LinkedIn DMs for this prospect.
 
 ## RESEARCH REPORT
 ${JSON.stringify(research, null, 2)}
-
+${psycheBlock}
 ## MY CONTEXT
 What I offer: ${context.offer || 'Not specified'}
 My company: ${context.company || 'Not specified'}
@@ -428,19 +632,27 @@ Why this prospect: ${context.why || 'Not specified'}
 Specific goal: ${context.goal || 'Start a conversation'}
 
 ## TONE: ${tone}
+## MODE: ${psyche ? 'SNIPER (full psyche data available — use ALL of it)' : 'STANDARD (no psyche data — use research only)'}
 
 Return a JSON array of 3 DM options:
 [
   {
-    "approach": "name of the approach (e.g., 'post-reference', 'shared-interest', 'value-first')",
-    "message": "the actual DM text",
-    "reasoning": "why this approach works for THIS person",
-    "hook_used": "which specific piece of their content/profile this references",
-    "follow_up": "suggested follow-up if they respond positively"
+    "approach": "name (e.g., 'archetype-trigger', 'gap-reveal', 'ego-mirror', 'shadow-speak', 'post-reference')",
+    "message": "the actual DM text — UNDER 100 WORDS — written in THEIR voice using mimicry rules",
+    "archetype_play": "which archetype trigger you're activating and why",
+    "freud_lever": "which unconscious desire you're speaking to",
+    "tone_match": "how this mirrors their specific writing style",
+    "sales_framework": "which Sales 101 methodology this uses and how",
+    "reasoning": "full strategic reasoning for this approach",
+    "hook_used": "specific content/profile element referenced",
+    "follow_up": "suggested follow-up if they respond",
+    "objection_preempt": "how this message preempts their likely objections"
   }
 ]
 
-Each DM must be different in approach. One should reference a specific post, one should lead with value, one should find common ground.`;
+DM 1: ARCHETYPE PLAY — activate their dominant Jungian archetype
+DM 2: GAP REVEAL — show the distance between where they are and where they want to be
+DM 3: EGO MIRROR — validate their public identity, then bridge to value`;
 
   const raw = await callAI(prompt, OUTREACH_SYSTEM, provider);
   try {
@@ -818,6 +1030,119 @@ app.post('/research/instant', async (req, res) => {
 });
 
 
+/* ─── PSYCHE ENGINE ENDPOINTS ─── */
+
+// POST /psyche/:id — full psychological profile (Freud + Jung + Tone + Sales 101)
+app.post('/psyche/:id', async (req, res) => {
+  if (!await rateCheck(apiLimiter, req.ip, res)) return;
+  const filePath = path.join(PROSPECTS, `${req.params.id}.json`);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Prospect not found' });
+
+  const { provider = 'anthropic' } = req.body;
+  const prospect = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+  if (!prospect.profile) return res.status(400).json({ error: 'Prospect has no profile data' });
+  if (!prospect.posts || prospect.posts.length === 0) {
+    return res.status(400).json({ error: 'Psyche analysis requires posts — scrape posts first' });
+  }
+
+  try {
+    const psycheReport = await profilePsyche(prospect.profile, prospect.posts, provider);
+
+    // save psyche data alongside research
+    const psychePath = path.join(RESEARCH, `${req.params.id}.psyche.json`);
+    fs.writeFileSync(psychePath, JSON.stringify({
+      id: req.params.id,
+      psyche: psycheReport,
+      provider,
+      generated_at: ts()
+    }, null, 2));
+
+    // update prospect status
+    prospect.status = 'psyche-profiled';
+    prospect.updated_at = ts();
+    fs.writeFileSync(filePath, JSON.stringify(prospect, null, 2));
+    if (index.prospects[req.params.id]) {
+      index.prospects[req.params.id].status = 'psyche-profiled';
+    }
+    index.stats.psyche_profiles = (index.stats.psyche_profiles || 0) + 1;
+    saveIndex();
+
+    res.json({ ok: true, id: req.params.id, psyche: psycheReport });
+  } catch (err) {
+    res.status(500).json({ error: 'Psyche analysis failed: ' + err.message });
+  }
+});
+
+// POST /sniper/:id — the full stack: research + psyche + sniper DM in one call
+app.post('/sniper/:id', async (req, res) => {
+  if (!await rateCheck(apiLimiter, req.ip, res)) return;
+  const filePath = path.join(PROSPECTS, `${req.params.id}.json`);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Prospect not found' });
+
+  const { context = {}, tone = 'professional', provider = 'anthropic' } = req.body;
+  const prospect = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+  if (!prospect.profile) return res.status(400).json({ error: 'Prospect has no profile data' });
+
+  try {
+    // Step 1: Research (or load existing)
+    let research;
+    const researchPath = path.join(RESEARCH, `${req.params.id}.json`);
+    if (fs.existsSync(researchPath)) {
+      research = JSON.parse(fs.readFileSync(researchPath, 'utf8')).report;
+    } else {
+      research = await researchProspect(prospect.profile, prospect.posts || [], provider);
+      fs.writeFileSync(researchPath, JSON.stringify({ id: req.params.id, report: research, provider, generated_at: ts() }, null, 2));
+    }
+
+    // Step 2: Psyche profile (or load existing)
+    let psycheReport;
+    const psychePath = path.join(RESEARCH, `${req.params.id}.psyche.json`);
+    if (fs.existsSync(psychePath)) {
+      psycheReport = JSON.parse(fs.readFileSync(psychePath, 'utf8')).psyche;
+    } else if (prospect.posts && prospect.posts.length > 0) {
+      psycheReport = await profilePsyche(prospect.profile, prospect.posts, provider);
+      fs.writeFileSync(psychePath, JSON.stringify({ id: req.params.id, psyche: psycheReport, provider, generated_at: ts() }, null, 2));
+    }
+
+    // Step 3: Sniper DMs (with full psyche data)
+    const dms = await generateDM(research, context, tone, provider, psycheReport || null);
+
+    // Save outreach history
+    const outreachPath = path.join(OUTREACH, `${req.params.id}.json`);
+    let history = [];
+    try { history = JSON.parse(fs.readFileSync(outreachPath, 'utf8')); } catch {}
+    history.push({ mode: 'sniper', dms, context, tone, psyche_used: !!psycheReport, generated_at: ts() });
+    fs.writeFileSync(outreachPath, JSON.stringify(history, null, 2));
+
+    // Update status
+    prospect.status = 'sniper-ready';
+    prospect.updated_at = ts();
+    fs.writeFileSync(filePath, JSON.stringify(prospect, null, 2));
+    if (index.prospects[req.params.id]) {
+      index.prospects[req.params.id].status = 'sniper-ready';
+    }
+    index.stats.dms = (index.stats.dms || 0) + 1;
+    index.stats.sniper_shots = (index.stats.sniper_shots || 0) + 1;
+    saveIndex();
+
+    res.json({
+      ok: true,
+      mode: 'sniper',
+      id: req.params.id,
+      research_summary: research.summary || research.best_approach,
+      archetype: psycheReport?.jung?.dominant_archetype || 'unknown',
+      tone_match: psycheReport?.tone?.register || 'unknown',
+      sales_method: psycheReport?.sales101?.methodology_fit || 'unknown',
+      options: dms
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Sniper generation failed: ' + err.message });
+  }
+});
+
+
 /* ─── OUTREACH GENERATION ─── */
 
 // POST /outreach/dm/:id — generate tailored DMs for a researched prospect
@@ -841,8 +1166,15 @@ app.post('/outreach/dm/:id', async (req, res) => {
     fs.writeFileSync(researchPath, JSON.stringify({ id: req.params.id, report: research, provider, generated_at: ts() }, null, 2));
   }
 
+  // auto-load psyche data if available (upgrades standard DM to sniper mode)
+  let psyche = null;
+  const psychePath = path.join(RESEARCH, `${req.params.id}.psyche.json`);
+  if (fs.existsSync(psychePath)) {
+    psyche = JSON.parse(fs.readFileSync(psychePath, 'utf8')).psyche;
+  }
+
   try {
-    const dms = await generateDM(research, context, tone, provider);
+    const dms = await generateDM(research, context, tone, provider, psyche);
 
     // save outreach
     const outreachPath = path.join(OUTREACH, `${req.params.id}.json`);
@@ -1067,13 +1399,17 @@ app.get('/stats', (req, res) => {
       campaigns: campaignCount,
       scrapes: index.stats.scrapes || 0,
       researches: index.stats.researches || 0,
+      psyche_profiles: index.stats.psyche_profiles || 0,
       dms_generated: index.stats.dms || 0,
+      sniper_shots: index.stats.sniper_shots || 0,
       by_status: statusCounts,
       pipeline: {
         scraped: statusCounts.scraped || 0,
         ingested: statusCounts.ingested || 0,
         researched: statusCounts.researched || 0,
+        psyche_profiled: statusCounts['psyche-profiled'] || 0,
         outreach_ready: statusCounts['outreach-ready'] || 0,
+        sniper_ready: statusCounts['sniper-ready'] || 0,
         contacted: statusCounts.contacted || 0,
         replied: statusCounts.replied || 0,
         converted: statusCounts.converted || 0

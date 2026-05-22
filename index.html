@@ -194,8 +194,8 @@ a:hover{text-decoration:underline}
 <!-- HERO -->
 <section class="hero">
   <div class="hero-badge">LinkedIn Intelligence API</div>
-  <h1>Research first.<br><span>Reach out second.</span></h1>
-  <p>Scrape profiles. Analyze their posts. Craft DMs that reference what they actually care about. Zero wasted small talk.</p>
+  <h1>Sniper outreach.<br><span>Not shotgun spam.</span></h1>
+  <p>Scrape profiles. Psychologically profile them — Freud, Jung, ToneEngine, Sales 101. Craft DMs that hit their archetype, mirror their voice, and speak to what they unconsciously want.</p>
   <a href="#endpoints" class="hero-cta">View Endpoints</a>
 </section>
 
@@ -228,13 +228,23 @@ a:hover{text-decoration:underline}
     </div>
     <div class="endpoint-card">
       <span class="endpoint-method method-post">POST</span>
+      <div class="endpoint-path">/psyche/:id</div>
+      <div class="endpoint-desc">Deep psychological profile. Freudian drive analysis (id/ego/superego), Jungian archetype mapping, ToneEngine voice fingerprint, Sales 101 methodology fit. The sniper scope.</div>
+    </div>
+    <div class="endpoint-card">
+      <span class="endpoint-method method-post">POST</span>
+      <div class="endpoint-path">/sniper/:id</div>
+      <div class="endpoint-desc">The full stack in one call. Research + psyche profile + 3 sniper DMs. Each activates their archetype, mirrors their voice, bridges their gap, preempts their objections.</div>
+    </div>
+    <div class="endpoint-card">
+      <span class="endpoint-method method-post">POST</span>
       <div class="endpoint-path">/outreach/dm/:id</div>
-      <div class="endpoint-desc">Generate 3 tailored DM options. Each references specific posts/achievements. Matches their communication style. Under 150 words.</div>
+      <div class="endpoint-desc">Generate 3 tailored DMs. Auto-loads psyche data when available for sniper mode. Falls back to standard personalization without it.</div>
     </div>
     <div class="endpoint-card">
       <span class="endpoint-method method-post">POST</span>
       <div class="endpoint-path">/outreach/comment</div>
-      <div class="endpoint-desc">Generate engagement comments for warm-up. Add value to their posts before DMing. They'll recognize your name.</div>
+      <div class="endpoint-desc">Warm-up engagement comments. Add genuine value to their posts before DMing. Build name recognition first.</div>
     </div>
     <div class="endpoint-card">
       <span class="endpoint-method method-get">GET</span>
@@ -272,7 +282,8 @@ a:hover{text-decoration:underline}
   <div class="code-tabs">
     <button class="code-tab active" data-tab="scrape">1. Scrape</button>
     <button class="code-tab" data-tab="research">2. Research</button>
-    <button class="code-tab" data-tab="dm">3. Generate DM</button>
+    <button class="code-tab" data-tab="psyche">3. Psyche</button>
+    <button class="code-tab" data-tab="sniper">4. Sniper DM</button>
     <button class="code-tab" data-tab="pipeline">Full Pipeline</button>
     <button class="code-tab" data-tab="comment">Engage First</button>
   </div>
@@ -306,8 +317,26 @@ a:hover{text-decoration:underline}
 <span class="cm">// research.hooks         → [{ reference: "their post about cold email fatigue" }]</span>
 <span class="cm">// research.best_approach → "lead with a specific insight about their PLG strategy"</span></pre>
 
-  <pre class="code-block" data-tab="dm"><span class="cm">// Generate tailored DMs</span>
-<span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`http://localhost:3005/outreach/dm/${prospect_id}`</span>, {
+  <pre class="code-block" data-tab="psyche"><span class="cm">// Deep psychological profile — Freud + Jung + Tone + Sales 101</span>
+<span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`http://localhost:3005/psyche/${prospect_id}`</span>, {
+  method: <span class="str">'POST'</span>,
+  headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+  body: JSON.<span class="fn">stringify</span>({ provider: <span class="str">'anthropic'</span> })
+});
+
+<span class="kw">const</span> { psyche } = <span class="kw">await</span> res.<span class="fn">json</span>();
+
+<span class="cm">// psyche.freud.id_desire       → "Recognition as a visionary builder"</span>
+<span class="cm">// psyche.freud.defense_mechanisms → ["intellectualization", "sublimation"]</span>
+<span class="cm">// psyche.jung.dominant_archetype → "Creator"</span>
+<span class="cm">// psyche.jung.trigger_phrase     → "Build something that didn't exist before"</span>
+<span class="cm">// psyche.tone.mimicry_rules      → { avg_sentence_length: "short", emoji: "none" }</span>
+<span class="cm">// psyche.sales101.methodology_fit → "Challenger"</span>
+<span class="cm">// psyche.sales101.gap            → { current: "manual outbound", desired: "automated" }</span>
+<span class="cm">// psyche.sniper_brief.emotional_entry_point → "validate their builder identity"</span></pre>
+
+  <pre class="code-block" data-tab="sniper"><span class="cm">// SNIPER MODE — research + psyche + DM in one call</span>
+<span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`http://localhost:3005/sniper/${prospect_id}`</span>, {
   method: <span class="str">'POST'</span>,
   headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
   body: JSON.<span class="fn">stringify</span>({
@@ -315,18 +344,23 @@ a:hover{text-decoration:underline}
       offer: <span class="str">'AI-powered sales intelligence platform'</span>,
       company: <span class="str">'FallScout'</span>,
       why: <span class="str">'They posted about outbound scaling challenges'</span>,
-      goal: <span class="str">'Book a 15-min demo'</span>
+      goal: <span class="str">'Start a conversation'</span>
     },
-    tone: <span class="str">'casual'</span>,
-    provider: <span class="str">'anthropic'</span>
+    tone: <span class="str">'casual'</span>
   })
 });
 
-<span class="kw">const</span> { options } = <span class="kw">await</span> res.<span class="fn">json</span>();
-<span class="cm">// 3 DM options, each referencing specific posts/achievements</span>
-<span class="cm">// Each under 150 words, matching their communication style</span></pre>
+<span class="kw">const</span> data = <span class="kw">await</span> res.<span class="fn">json</span>();
+<span class="cm">// data.mode         → "sniper"</span>
+<span class="cm">// data.archetype    → "Creator" (their Jungian type)</span>
+<span class="cm">// data.tone_match   → "conversational" (their voice register)</span>
+<span class="cm">// data.sales_method → "Challenger" (optimal framework)</span>
+<span class="cm">// data.options[0].approach       → "archetype-trigger"</span>
+<span class="cm">// data.options[0].archetype_play  → "activating Creator: 'build something new'"</span>
+<span class="cm">// data.options[0].freud_lever     → "ego validation of builder identity"</span>
+<span class="cm">// data.options[0].message         → the actual DM, written in THEIR voice</span></pre>
 
-  <pre class="code-block" data-tab="pipeline"><span class="cm">// Full pipeline: scrape → research → outreach → export to FallLead</span>
+  <pre class="code-block" data-tab="pipeline"><span class="cm">// Full pipeline: scrape → psyche → sniper → export to FallLead</span>
 <span class="kw">async function</span> <span class="fn">fullPipeline</span>(linkedinUrl, cookies, context) {
   <span class="cm">// 1. Scrape</span>
   <span class="kw">const</span> { prospect_id } = <span class="kw">await</span> <span class="fn">api</span>(<span class="str">'/scrape/full'</span>, {
@@ -383,13 +417,28 @@ a:hover{text-decoration:underline}
     </div>
     <div class="feature-card">
       <div class="feature-icon">🧠</div>
-      <div class="feature-title">AI Research Reports</div>
-      <div class="feature-desc">Claude/GPT/Gemini analyzes profile + posts. Returns interests, pain points, hooks, decision signals, communication style.</div>
+      <div class="feature-title">Freudian Drive Analysis</div>
+      <div class="feature-desc">Map their Id (desire), Ego (presentation), Superego (values). Find the gap between who they ARE and who they PERFORM. Identify defense mechanisms and transference type.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎭</div>
+      <div class="feature-title">Jungian Archetype Mapping</div>
+      <div class="feature-desc">12 archetypes: Creator, Ruler, Sage, Explorer, Hero, Magician, Rebel, Lover, Caregiver, Jester, Everyman, Innocent. Identify dominant + shadow. Know their trigger phrase.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎤</div>
+      <div class="feature-title">ToneEngine Voice Fingerprint</div>
+      <div class="feature-desc">Rhythm, register, power words, signature patterns, emotional valence, status signals. Full mimicry blueprint — write AS THEM.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">Sales 101 Methodology</div>
+      <div class="feature-desc">SPIN, Challenger, Solution, Consultative, Sandler, Gap Selling. Auto-selects the optimal framework. Maps buying stage and decision style.</div>
     </div>
     <div class="feature-card">
       <div class="feature-icon">💬</div>
-      <div class="feature-title">Tailored DMs</div>
-      <div class="feature-desc">3 options per prospect. Each references specific content. Matches their tone. Under 150 words. No templates.</div>
+      <div class="feature-title">Sniper DMs</div>
+      <div class="feature-desc">3 options: archetype-trigger, gap-reveal, ego-mirror. Each under 100 words, written in THEIR voice, preempting their objections.</div>
     </div>
     <div class="feature-card">
       <div class="feature-icon">🔥</div>
