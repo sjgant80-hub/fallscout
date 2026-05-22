@@ -1,0 +1,1101 @@
+openapi: 3.0.3
+info:
+  title: FallScout API
+  version: 1.0.0
+  description: >-
+    LinkedIn Intelligence API — scrape profiles, psychological profiling
+    (Freud, Jung, ToneEngine, Sales 101), sniper-grade tailored DMs.
+    Zero wasted small talk.
+  contact:
+    name: FallScout Support
+    email: support@fallscout.com
+
+servers:
+  - url: https://fallscout.p.rapidapi.com
+    description: RapidAPI Production
+
+paths:
+  # ── Scraping ──────────────────────────────────────────────
+  /scrape/profile:
+    post:
+      summary: Scrape LinkedIn profile
+      description: Extract structured profile data from a LinkedIn profile URL.
+      operationId: scrapeProfile
+      tags: [Scraping]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url, cookies]
+              properties:
+                url:
+                  type: string
+                  description: LinkedIn profile URL
+                  example: https://www.linkedin.com/in/johndoe
+                cookies:
+                  type: string
+                  description: LinkedIn session cookies (li_at value)
+      responses:
+        '200':
+          description: Profile data extracted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /scrape/posts:
+    post:
+      summary: Scrape LinkedIn posts
+      description: Extract recent posts from a LinkedIn profile.
+      operationId: scrapePosts
+      tags: [Scraping]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url, cookies]
+              properties:
+                url:
+                  type: string
+                  description: LinkedIn profile URL
+                cookies:
+                  type: string
+                  description: LinkedIn session cookies
+                count:
+                  type: integer
+                  description: Number of posts to scrape
+                  default: 10
+      responses:
+        '200':
+          description: Posts extracted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /scrape/full:
+    post:
+      summary: Full profile + posts scrape
+      description: >-
+        Scrape profile and posts in one call. Optionally save as a prospect
+        for pipeline tracking.
+      operationId: scrapeFull
+      tags: [Scraping]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url, cookies]
+              properties:
+                url:
+                  type: string
+                  description: LinkedIn profile URL
+                cookies:
+                  type: string
+                  description: LinkedIn session cookies
+                post_count:
+                  type: integer
+                  description: Number of posts to scrape
+                  default: 10
+                save:
+                  type: boolean
+                  description: Save as prospect in pipeline
+                  default: false
+      responses:
+        '200':
+          description: Full scrape result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  profile:
+                    $ref: '#/components/schemas/ProfileData'
+                  posts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+                  prospect_id:
+                    type: string
+                    description: Prospect ID (only if save=true)
+                    nullable: true
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  # ── Ingestion ─────────────────────────────────────────────
+  /ingest:
+    post:
+      summary: Manual prospect creation
+      description: Create a prospect from manually provided profile and post data.
+      operationId: ingestProspect
+      tags: [Ingestion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [profile, posts]
+              properties:
+                profile:
+                  $ref: '#/components/schemas/ProfileData'
+                posts:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Post'
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: Tags for categorization
+      responses:
+        '201':
+          description: Prospect created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prospect'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /ingest/batch:
+    post:
+      summary: Bulk prospect import
+      description: Import multiple prospects in a single request.
+      operationId: ingestBatch
+      tags: [Ingestion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prospects]
+              properties:
+                prospects:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      profile:
+                        $ref: '#/components/schemas/ProfileData'
+                      posts:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Post'
+                      tags:
+                        type: array
+                        items:
+                          type: string
+      responses:
+        '201':
+          description: Batch import result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  imported:
+                    type: integer
+                  failed:
+                    type: integer
+                  prospect_ids:
+                    type: array
+                    items:
+                      type: string
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  # ── Prospects ─────────────────────────────────────────────
+  /prospects:
+    get:
+      summary: List prospects
+      description: List prospects with filtering, sorting, and pagination.
+      operationId: listProspects
+      tags: [Prospects]
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [new, researched, contacted, replied, converted, archived]
+        - name: campaign
+          in: query
+          schema:
+            type: string
+        - name: tag
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [created, updated, name, status]
+            default: created
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Prospect list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prospects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Prospect'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  pages:
+                    type: integer
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /prospects/{id}:
+    get:
+      summary: Get prospect detail
+      description: Full prospect detail including research history and outreach log.
+      operationId: getProspect
+      tags: [Prospects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Prospect detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProspectDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Update prospect
+      description: Update prospect status, tags, or campaign assignment.
+      operationId: updateProspect
+      tags: [Prospects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [new, researched, contacted, replied, converted, archived]
+                tags:
+                  type: array
+                  items:
+                    type: string
+                campaign:
+                  type: string
+      responses:
+        '200':
+          description: Prospect updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prospect'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete prospect
+      description: Permanently remove a prospect and all associated data.
+      operationId: deleteProspect
+      tags: [Prospects]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Prospect deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                  id:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Research ──────────────────────────────────────────────
+  /research/{id}:
+    post:
+      summary: AI research analysis
+      description: >-
+        Run AI-powered research analysis on a prospect. Analyzes profile,
+        posts, and generates actionable intelligence.
+      operationId: researchProspect
+      tags: [Research]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Research analysis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /research/instant:
+    post:
+      summary: Instant research (no save)
+      description: >-
+        Run research analysis on provided data without saving to the pipeline.
+        Useful for one-off analysis.
+      operationId: researchInstant
+      tags: [Research]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [profile, posts]
+              properties:
+                profile:
+                  $ref: '#/components/schemas/ProfileData'
+                posts:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Post'
+      responses:
+        '200':
+          description: Research result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchResult'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  # ── Psyche Engine ─────────────────────────────────────────
+  /psyche/{id}:
+    post:
+      summary: Psychological profiling
+      description: >-
+        Full psychological profile using Freudian analysis, Jungian archetypes,
+        ToneEngine voice mapping, and Sales 101 behavioral triggers. The
+        Psyche Engine is FallScout's core differentiator.
+      operationId: psycheProfile
+      tags: [Psyche Engine]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Psychological profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PsycheResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  # ── Sniper ────────────────────────────────────────────────
+  /sniper/{id}:
+    post:
+      summary: Full sniper stack
+      description: >-
+        The full pipeline in one call: research + psyche profiling + sniper-grade
+        tailored DMs. Returns everything needed to engage the prospect.
+      operationId: sniperFull
+      tags: [Sniper]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sniper result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SniperResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  # ── Outreach ──────────────────────────────────────────────
+  /outreach/dm/{id}:
+    post:
+      summary: Generate tailored DMs
+      description: >-
+        Generate personalized direct messages for a prospect.
+        Auto-loads psyche profile if available.
+      operationId: generateDMs
+      tags: [Outreach]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Generated DMs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prospect_id:
+                    type: string
+                  dms:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        message:
+                          type: string
+                        tone:
+                          type: string
+                        hook:
+                          type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /outreach/comment:
+    post:
+      summary: Generate engagement comments
+      description: Generate contextual comments for engaging with prospect content.
+      operationId: generateComments
+      tags: [Outreach]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [post_content]
+              properties:
+                post_content:
+                  type: string
+                  description: The post content to comment on
+                tone:
+                  type: string
+                  description: Desired comment tone
+                  enum: [professional, casual, insightful, supportive]
+                  default: insightful
+      responses:
+        '200':
+          description: Generated comments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        comment:
+                          type: string
+                        tone:
+                          type: string
+                        engagement_score:
+                          type: number
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  # ── Campaigns ─────────────────────────────────────────────
+  /campaigns:
+    post:
+      summary: Create campaign
+      description: Create a new outreach campaign.
+      operationId: createCampaign
+      tags: [Campaigns]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                target_tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Campaign created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+    get:
+      summary: List campaigns
+      description: List all campaigns with summary stats.
+      operationId: listCampaigns
+      tags: [Campaigns]
+      responses:
+        '200':
+          description: Campaign list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  campaigns:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Campaign'
+
+  /campaigns/{id}/prospects:
+    post:
+      summary: Add prospects to campaign
+      description: Assign one or more prospects to a campaign.
+      operationId: addProspectsToCampaign
+      tags: [Campaigns]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prospect_ids]
+              properties:
+                prospect_ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Prospects added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  added:
+                    type: integer
+                  campaign_id:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /campaigns/{id}/research-all:
+    post:
+      summary: Bulk research campaign prospects
+      description: Run research analysis on all prospects in a campaign.
+      operationId: researchAllCampaignProspects
+      tags: [Campaigns]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bulk research result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  campaign_id:
+                    type: string
+                  researched:
+                    type: integer
+                  failed:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        prospect_id:
+                          type: string
+                        status:
+                          type: string
+                          enum: [success, failed]
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  # ── Export ────────────────────────────────────────────────
+  /export/falllead:
+    post:
+      summary: Export as FallLead leads
+      description: Export prospects in FallLead-compatible format.
+      operationId: exportFallLead
+      tags: [Export]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prospect_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: Specific prospect IDs to export (all if omitted)
+                campaign:
+                  type: string
+                  description: Export all prospects from a campaign
+      responses:
+        '200':
+          description: FallLead export
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  leads:
+                    type: array
+                    items:
+                      type: object
+                  count:
+                    type: integer
+                  format:
+                    type: string
+                    example: falllead_v1
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  # ── Stats & Health ────────────────────────────────────────
+  /stats:
+    get:
+      summary: Pipeline analytics
+      description: Get pipeline analytics and conversion metrics.
+      operationId: getStats
+      tags: [Analytics]
+      responses:
+        '200':
+          description: Pipeline stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_prospects:
+                    type: integer
+                  by_status:
+                    type: object
+                  by_campaign:
+                    type: object
+                  conversion_rate:
+                    type: number
+                  researched_rate:
+                    type: number
+
+  /health:
+    get:
+      summary: Health check
+      description: API health and version check.
+      operationId: healthCheck
+      tags: [System]
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  version:
+                    type: string
+                  uptime:
+                    type: number
+
+# ── Shared Components ─────────────────────────────────────
+components:
+  schemas:
+    ProfileData:
+      type: object
+      properties:
+        name:
+          type: string
+        headline:
+          type: string
+        location:
+          type: string
+        about:
+          type: string
+        linkedin_url:
+          type: string
+        experience:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              company:
+                type: string
+              duration:
+                type: string
+        education:
+          type: array
+          items:
+            type: object
+            properties:
+              school:
+                type: string
+              degree:
+                type: string
+        skills:
+          type: array
+          items:
+            type: string
+        connections:
+          type: integer
+
+    Post:
+      type: object
+      properties:
+        content:
+          type: string
+        date:
+          type: string
+        likes:
+          type: integer
+        comments:
+          type: integer
+        reposts:
+          type: integer
+
+    Prospect:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        headline:
+          type: string
+        linkedin_url:
+          type: string
+        status:
+          type: string
+          enum: [new, researched, contacted, replied, converted, archived]
+        tags:
+          type: array
+          items:
+            type: string
+        campaign:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ProspectDetail:
+      allOf:
+        - $ref: '#/components/schemas/Prospect'
+        - type: object
+          properties:
+            profile:
+              $ref: '#/components/schemas/ProfileData'
+            posts:
+              type: array
+              items:
+                $ref: '#/components/schemas/Post'
+            research:
+              $ref: '#/components/schemas/ResearchResult'
+            psyche:
+              $ref: '#/components/schemas/PsycheResult'
+            outreach_history:
+              type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  message:
+                    type: string
+                  sent_at:
+                    type: string
+                    format: date-time
+
+    ResearchResult:
+      type: object
+      properties:
+        summary:
+          type: string
+        key_interests:
+          type: array
+          items:
+            type: string
+        pain_points:
+          type: array
+          items:
+            type: string
+        opportunities:
+          type: array
+          items:
+            type: string
+        talking_points:
+          type: array
+          items:
+            type: string
+        influence_score:
+          type: number
+
+    PsycheResult:
+      type: object
+      properties:
+        freudian:
+          type: object
+          properties:
+            ego_drivers:
+              type: array
+              items:
+                type: string
+            defense_mechanisms:
+              type: array
+              items:
+                type: string
+            motivation_layer:
+              type: string
+        jungian:
+          type: object
+          properties:
+            archetype:
+              type: string
+            shadow:
+              type: string
+            persona:
+              type: string
+            communication_style:
+              type: string
+        tone_engine:
+          type: object
+          properties:
+            dominant_tone:
+              type: string
+            register:
+              type: string
+            vocabulary_level:
+              type: string
+            preferred_hooks:
+              type: array
+              items:
+                type: string
+        sales_101:
+          type: object
+          properties:
+            buyer_type:
+              type: string
+            objection_patterns:
+              type: array
+              items:
+                type: string
+            trigger_words:
+              type: array
+              items:
+                type: string
+            closing_style:
+              type: string
+
+    SniperResult:
+      type: object
+      properties:
+        prospect_id:
+          type: string
+        research:
+          $ref: '#/components/schemas/ResearchResult'
+        psyche:
+          $ref: '#/components/schemas/PsycheResult'
+        dms:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              message:
+                type: string
+              tone:
+                type: string
+              hook:
+                type: string
+              psychological_lever:
+                type: string
+
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        prospect_count:
+          type: integer
+        target_tags:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Not found
+
+    RateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              limit:
+                type: integer
+              used:
+                type: integer
+              tier:
+                type: string
+              upgrade:
+                type: string
+
+  securitySchemes:
+    RapidAPI:
+      type: apiKey
+      in: header
+      name: X-RapidAPI-Key
+
+security:
+  - RapidAPI: []
+
+tags:
+  - name: Scraping
+    description: LinkedIn profile and post scraping
+  - name: Ingestion
+    description: Manual prospect creation and bulk import
+  - name: Prospects
+    description: Prospect pipeline management
+  - name: Research
+    description: AI-powered prospect research
+  - name: Psyche Engine
+    description: Psychological profiling (Freud, Jung, ToneEngine, Sales 101)
+  - name: Sniper
+    description: Full-stack intelligence + tailored DM generation
+  - name: Outreach
+    description: DM and comment generation
+  - name: Campaigns
+    description: Campaign management
+  - name: Export
+    description: Data export
+  - name: Analytics
+    description: Pipeline analytics and metrics
+  - name: System
+    description: Health and system endpoints
