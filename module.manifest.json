@@ -1,0 +1,18 @@
+{
+  "$schema": "https://sjgant80-hub.github.io/fallhub/modules/manifest.schema.json",
+  "name": "fallscout",
+  "version": "1.0.0",
+  "publisher": "AI-Native Solutions",
+  "publisher_url": "https://www.ai-nativesolutions.com/",
+  "licence": "MIT",
+  "description": "Puppeteer-stealth-based automation · LinkedIn / FB / Upwork / Fiverr / Gmail navigation",
+  "provides": ["web_automation","stealth_navigation","platform_scraping"],
+  "tools": [],
+  "kernel_extension": {},
+  "compatible_verticals": ["adshop","consulting","*"],
+  "requires": ["byok_adapter@>=1.0.0"],
+  "ui_surfaces": [],
+  "mit": true,
+  "konomi_seal": "◊·κ=1",
+  "estate": true
+}
