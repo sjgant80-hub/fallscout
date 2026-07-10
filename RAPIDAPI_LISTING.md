@@ -41,13 +41,13 @@ Data > Lead Generation
 
 ---
 
-## Pricing
+## Access
 
-| Plan | Price | Monthly Requests | Daily Requests | Rate (per min) |
+| Plan | Access | Monthly Requests | Daily Requests | Rate (per min) |
 |------|-------|-----------------|---------------|----------------|
 | BASIC | Free | 10 | 3 | 2 |
-| PRO | $29/mo | 100 | 10 | 5 |
-| ULTRA | $99/mo | 1,000 | 100 | 20 |
+| PRO | TBA | 100 | 10 | 5 |
+| ULTRA | TBA | 1,000 | 100 | 20 |
 | MEGA | Custom | Unlimited | Unlimited | 300 |
 
 ---

@@ -271,7 +271,7 @@ Leverages ToneEngine mimicry rules to write in the prospect's own voice patterns
 
 ---
 
-## Pricing
+## Access
 
 | Tier | Prospects/Month | Features |
 |------|----------------|----------|
